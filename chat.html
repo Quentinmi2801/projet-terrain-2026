@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notre chat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --paper:#EDE3CC; --ink:#1B2A4A; --ink-soft:#334463; --sage:#6E8B7A; --stamp:#B24C3A; --rose:#B5645C; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    background:
+      linear-gradient(rgba(27,42,74,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(27,42,74,0.05) 1px, transparent 1px),
+      var(--paper);
+    background-size:22px 22px, 22px 22px, auto;
+    color:var(--ink-soft); font-family:'Source Serif 4', serif; line-height:1.5;
+    height:100svh; display:flex; flex-direction:column;
+  }
+  a.back{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; color:var(--ink); text-decoration:none; padding:1rem 1.2rem 0; display:inline-block; }
+  a.back:before{ content:"← "; }
+  h1{ font-family:'Caveat', cursive; font-size:1.8rem; color:var(--ink); text-align:center; margin:0.2rem 0 0.8rem; }
+
+  #whoami{ text-align:center; padding:2rem 1.5rem; }
+  #whoami p{ font-family:'IBM Plex Mono', monospace; font-size:0.75rem; margin-bottom:1rem; opacity:0.8; }
+  #whoami button{
+    all:unset; cursor:pointer; font-family:'Caveat', cursive; font-size:1.3rem; font-weight:700;
+    background:var(--ink); color:var(--paper); padding:0.6rem 1.6rem; border-radius:16px 6px 16px 6px; margin:0 0.4rem;
+  }
+
+  #chat-wrap{ display:none; flex-direction:column; flex:1; min-height:0; }
+  #messages{ flex:1; overflow-y:auto; padding:0.5rem 1rem 1rem; }
+  .msg{ max-width:75%; margin-bottom:0.7rem; padding:0.55rem 0.8rem; border-radius:14px 4px 14px 14px; font-size:0.98rem; position:relative; }
+  .msg.me{ background:rgba(178,76,58,0.15); border:1px solid rgba(178,76,58,0.3); margin-left:auto; border-radius:4px 14px 14px 14px; }
+  .msg.them{ background:rgba(110,139,122,0.18); border:1px solid rgba(110,139,122,0.35); }
+  .msg .meta{ font-family:'IBM Plex Mono', monospace; font-size:0.58rem; opacity:0.55; margin-top:0.25rem; }
+
+  #compose{ display:flex; gap:0.5rem; padding:0.8rem; border-top:1px dashed rgba(27,42,74,0.3); background:rgba(255,255,255,0.3); }
+  #compose input{
+    flex:1; font-family:'Source Serif 4', serif; font-size:1rem; padding:0.6rem 0.8rem;
+    border:1px solid rgba(27,42,74,0.3); border-radius:16px; background:var(--paper);
+  }
+  #compose button{ all:unset; cursor:pointer; font-size:1.4rem; padding:0 0.4rem; }
+  #status{ text-align:center; font-family:'IBM Plex Mono', monospace; font-size:0.65rem; opacity:0.5; padding:0.4rem; }
+</style>
+</head>
+<body>
+
+<a class="back" href="index.html">retour au carnet</a>
+<h1>Notre chat</h1>
+
+<div id="whoami">
+  <p>tu es qui, toi ?</p>
+  <button id="btn-quentin">Quentin</button>
+  <button id="btn-arwen">Arwen</button>
+</div>
+
+<div id="chat-wrap">
+  <div id="messages"></div>
+  <div id="compose">
+    <input id="msg-input" type="text" placeholder="écris quelque chose..." maxlength="500">
+    <button id="send-btn">➤</button>
+  </div>
+</div>
+<div id="status"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+  const statusEl = document.getElementById('status');
+  let db = null;
+  try{
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+  }catch(e){
+    statusEl.textContent = "Connexion au chat impossible — vérifie firebase-config.js";
+  }
+
+  const whoamiEl = document.getElementById('whoami');
+  const chatWrap = document.getElementById('chat-wrap');
+  const messagesEl = document.getElementById('messages');
+  const input = document.getElementById('msg-input');
+
+  let me = localStorage.getItem('carnet-whoami');
+
+  function startChat(){
+    whoamiEl.style.display = 'none';
+    chatWrap.style.display = 'flex';
+    if(!db) return;
+
+    db.collection('messages').orderBy('ts', 'asc').limit(200)
+      .onSnapshot(snap => {
+        messagesEl.innerHTML = '';
+        snap.forEach(doc => {
+          const m = doc.data();
+          const div = document.createElement('div');
+          div.className = 'msg ' + (m.sender === me ? 'me' : 'them');
+          const time = m.ts && m.ts.toDate ? m.ts.toDate().toLocaleString('fr-FR', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}) : '';
+          div.innerHTML = `${escapeHtml(m.text)}<div class="meta">${m.sender} · ${time}</div>`;
+          messagesEl.appendChild(div);
+        });
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }, err => {
+        statusEl.textContent = "Erreur de lecture — vérifie les règles Firestore.";
+      });
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  document.getElementById('btn-quentin').addEventListener('click', () => { me='Quentin'; localStorage.setItem('carnet-whoami', me); startChat(); });
+  document.getElementById('btn-arwen').addEventListener('click', () => { me='Arwen'; localStorage.setItem('carnet-whoami', me); startChat(); });
+
+  if(me){ startChat(); }
+
+  function sendMessage(){
+    const text = input.value.trim();
+    if(!text || !db || !me) return;
+    input.value = '';
+    db.collection('messages').add({
+      sender: me,
+      text: text,
+      key: (typeof SHARED_KEY !== 'undefined') ? SHARED_KEY : '',
+      ts: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(() => { statusEl.textContent = "Message non envoyé — vérifie les règles Firestore."; });
+  }
+  document.getElementById('send-btn').addEventListener('click', sendMessage);
+  input.addEventListener('keydown', e => { if(e.key === 'Enter') sendMessage(); });
+</script>
+
+</body>
+</html>
