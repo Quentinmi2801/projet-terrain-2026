@@ -64,13 +64,14 @@
       <button class="type-btn active" data-type="texte">Texte</button>
       <button class="type-btn" data-type="audio">Audio</button>
       <button class="type-btn" data-type="video">Vidéo</button>
+      <button class="type-btn" data-type="document">Document</button>
     </div>
 
     <div id="field-texte">
       <textarea id="text-input" placeholder="écris ce que tu veux ici..."></textarea>
     </div>
     <div id="field-file" style="display:none;">
-      <input type="file" id="file-input" accept="audio/*,video/*">
+      <input type="file" id="file-input">
     </div>
 
     <button class="btn" id="submit-btn">Déposer</button>
@@ -140,6 +141,7 @@
     if(d.type === 'texte'){ html = d.content.split('\n\n').map(p => `<p>${p}</p>`).join(''); }
     else if(d.type === 'audio'){ html = `<audio controls src="${d.url}"></audio>`; }
     else if(d.type === 'video'){ html = `<video controls src="${d.url}"></video>`; }
+    else if(d.type === 'document'){ html = `<a class="btn" href="${d.url}" target="_blank" rel="noopener">Ouvrir le document</a>`; }
     container.innerHTML = html;
   }
 
@@ -162,7 +164,7 @@
       const doc = await db.collection('week9').doc('submission').get();
       if(doc.exists){
         const d = doc.data();
-        if((d.type === 'audio' || d.type === 'video') && d.url){
+        if((d.type === 'audio' || d.type === 'video' || d.type === 'document') && d.url){
           try{ await storage.refFromURL(d.url).delete(); }catch(e){}
         }
       }
@@ -184,6 +186,7 @@
       if(d.type === 'texte'){ html = d.content.split('\n\n').map(p => `<p>${p}</p>`).join(''); }
       else if(d.type === 'audio'){ html = `<audio controls src="${d.url}"></audio>`; }
       else if(d.type === 'video'){ html = `<video controls src="${d.url}"></video>`; }
+      else if(d.type === 'document'){ html = `<a class="btn" href="${d.url}" target="_blank" rel="noopener">Ouvrir le document</a>`; }
       document.getElementById('reveal-content').innerHTML = html;
       panelReveal.style.display = 'block';
     }).catch(()=>{});

@@ -212,6 +212,26 @@
   }
   .chat-tab.revealed{ display:block; }
   .chat-tab:active{ transform:translateX(2px); }
+
+  .menu-btn{
+    display:none; position:fixed; top:1rem; left:1rem; z-index:60;
+    width:44px; height:44px; border-radius:50%;
+    background:var(--paper-dark); border:1.5px solid var(--ink); color:var(--ink);
+    font-size:1.2rem; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,0.2);
+  }
+  .menu-btn.revealed{ display:block; }
+  .menu-dropdown{
+    display:none; position:fixed; top:4.2rem; left:1rem; z-index:60;
+    background:var(--paper-dark); border:1px solid rgba(27,42,74,0.3); border-radius:4px 14px 14px 14px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.25); overflow:hidden; min-width:180px;
+  }
+  .menu-dropdown.open{ display:block; }
+  .menu-dropdown a{
+    display:block; padding:0.8rem 1.1rem; font-family:'IBM Plex Mono', monospace; font-size:0.78rem;
+    color:var(--ink); text-decoration:none; border-bottom:1px dashed rgba(27,42,74,0.2);
+  }
+  .menu-dropdown a:last-child{ border-bottom:none; }
+  .menu-dropdown a:active{ background:rgba(27,42,74,0.08); }
 </style>
 </head>
 <body>
@@ -244,6 +264,12 @@
   </div>
 
   <a href="chat.html" class="chat-tab" id="chat-tab">💬 chat</a>
+  <button class="menu-btn" id="menu-btn">☰</button>
+  <div class="menu-dropdown" id="menu-dropdown">
+    <a href="index.html">Panneau de bord</a>
+    <a href="bibliotheque.html">Bibliothèque</a>
+    <a href="chat.html">Chat</a>
+  </div>
 
   <div id="site">
     <div class="page">
@@ -323,31 +349,12 @@
         <h2 style="margin-bottom:1rem;">Le journal</h2>
         <div class="capsule-grid" id="capsule-list"></div>
       </section>
-      <div class="washi-divider"></div>
-
-      <section>
-        <span class="sticker" style="top:-4px; left:6%; font-size:1.3rem; transform:rotate(-10deg);">🎞️</span>
-        <span class="sticker" style="top:2%; right:6%; font-size:1.2rem; transform:rotate(9deg); color:var(--gold);">🌾</span>
-        <span class="stamp-label">bibliothèque</span>
-        
-        <div class="collage" id="photo-collage"></div>
-      </section>
-
       <div class="washi-divider" style="max-width:120px;"></div>
       <footer>dernière écriture: dépend de mon humeur 🫦</footer>
     </div>
   </div>
 
-  <div id="lightbox">
-    <button class="lb-close" id="lb-close">✕</button>
-    <div>
-      <img id="lb-img" src="" alt="">
-      <div class="lb-cap" id="lb-cap"></div>
-    </div>
-  </div>
-
 <script src="entries.js?v=13"></script>
-<script src="photos.js?v=2"></script>
 <script>
   // ---- GATE ----
   const CODE = '0506';
@@ -357,6 +364,8 @@
   const gate = document.getElementById('gate');
   const site = document.getElementById('site');
   const chatTab = document.getElementById('chat-tab');
+  const menuBtn = document.getElementById('menu-btn');
+  const menuDropdown = document.getElementById('menu-dropdown');
   const stepWho = document.getElementById('gate-step-who');
   const stepArwen = document.getElementById('gate-step-arwen');
   const stepAdmin = document.getElementById('gate-step-admin');
@@ -366,7 +375,13 @@
     gate.style.display='none';
     site.classList.add('revealed');
     chatTab.classList.add('revealed');
+    menuBtn.classList.add('revealed');
   }
+
+  menuBtn.addEventListener('click', () => menuDropdown.classList.toggle('open'));
+  document.addEventListener('click', (e) => {
+    if(!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) menuDropdown.classList.remove('open');
+  });
 
   if(sessionStorage.getItem('unlocked') === '1'){ revealSite(); }
 
@@ -457,24 +472,6 @@
     }
     list.appendChild(a);
   });
-
-  // ---- BIBLIOTHEQUE + LIGHTBOX ----
-  const collage = document.getElementById('photo-collage');
-  const lightbox = document.getElementById('lightbox');
-  const lbImg = document.getElementById('lb-img');
-  const lbCap = document.getElementById('lb-cap');
-  PHOTOS.forEach(p => {
-    const div = document.createElement('div');
-    div.className = 'polaroid';
-    div.innerHTML = `<img src="${p.src}" alt=""><div class="cap">${p.caption}${p.date ? ' — '+p.date : ''}</div>`;
-    div.addEventListener('click', () => {
-      lbImg.src = p.src; lbCap.textContent = p.caption + (p.date ? ' — '+p.date : '');
-      lightbox.classList.add('open');
-    });
-    collage.appendChild(div);
-  });
-  document.getElementById('lb-close').addEventListener('click', () => lightbox.classList.remove('open'));
-  lightbox.addEventListener('click', e => { if(e.target === lightbox) lightbox.classList.remove('open'); });
 </script>
 
 </body>
