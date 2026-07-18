@@ -428,7 +428,7 @@
     const unlocked = isUnlocked(entry);
     const a = document.createElement(unlocked ? 'a' : 'div');
     a.className = 'capsule-card' + (unlocked ? '' : ' locked');
-    if(unlocked) a.href = (entry.type === 'escape') ? 'escape.html' : ('semaine.html?id=' + entry.id);
+    if(unlocked) a.href = (entry.type === 'escape') ? 'escape.html' : (entry.id === 4 ? 'semaine4.html' : ('semaine.html?id=' + entry.id));
     a.innerHTML = `
       <span class="badge">${unlocked ? '🌸' : '🔒'}</span>
       <h3>${entry.title}</h3>

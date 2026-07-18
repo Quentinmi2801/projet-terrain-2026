@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devine un peu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --paper:#EDE3CC; --ink:#1B2A4A; --ink-soft:#334463; --sage:#6E8B7A; --stamp:#B24C3A; --gold:#C99A3E; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    background:
+      linear-gradient(rgba(27,42,74,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(27,42,74,0.05) 1px, transparent 1px),
+      var(--paper);
+    background-size:22px 22px, 22px 22px, auto;
+    color:var(--ink-soft); font-family:'Source Serif 4', serif; line-height:1.6; min-height:100svh;
+  }
+  .page{ max-width:600px; margin:0 auto; padding:2rem 1.3rem 4rem; }
+  a.back{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; color:var(--ink); text-decoration:none; display:inline-block; margin-bottom:1rem; }
+  a.back:before{ content:"← "; }
+  h1{ font-family:'Caveat', cursive; font-size:2rem; color:var(--ink); text-align:center; margin-bottom:0.4rem; }
+
+  .progress{ text-align:center; font-family:'IBM Plex Mono', monospace; font-size:0.68rem; opacity:0.6; margin-bottom:1rem; }
+  .timer{ text-align:center; font-family:'Caveat', cursive; font-size:2rem; color:var(--stamp); margin-bottom:0.6rem; }
+
+  .card{ border:1.5px solid rgba(27,42,74,0.2); background:rgba(255,255,255,0.35); border-radius:18px 8px 20px 10px; padding:1.4rem 1.2rem; margin-bottom:1.2rem; }
+  .qtext{ font-family:'Caveat', cursive; font-size:1.5rem; color:var(--ink); text-align:center; margin-bottom:1rem; }
+
+  input[type="text"]{ width:100%; font-family:'Source Serif 4', serif; font-size:1rem; padding:0.6rem 0.8rem; border:1px solid rgba(27,42,74,0.3); border-radius:10px; background:var(--paper); margin-bottom:0.6rem; }
+  .btn{ all:unset; cursor:pointer; display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:0.8rem; letter-spacing:0.05em; text-transform:uppercase; background:var(--ink); color:var(--paper); padding:0.7rem 1.3rem; border-radius:16px 6px 16px 6px; }
+  .btn.ghost{ background:transparent; border:1.5px solid var(--ink); color:var(--ink); }
+  .btn-row{ display:flex; gap:0.6rem; justify-content:center; flex-wrap:wrap; }
+
+  .reveal-row{ display:flex; gap:0.6rem; margin:0.8rem 0; }
+  .reveal-box{ flex:1; border:1px dashed rgba(27,42,74,0.35); border-radius:10px; padding:0.7rem; text-align:center; }
+  .reveal-box .label{ font-family:'IBM Plex Mono', monospace; font-size:0.58rem; letter-spacing:0.05em; text-transform:uppercase; color:var(--sage); display:block; margin-bottom:0.3rem; }
+  .reveal-box .value{ font-family:'Caveat', cursive; font-size:1.3rem; color:var(--ink); }
+
+  #done{ display:none; text-align:center; }
+  #done .card{ text-align:center; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <a class="back" href="index.html">retour au carnet</a>
+  <h1>Devine un peu</h1>
+  <div class="progress" id="progress"></div>
+
+  <div id="game">
+    <div class="timer" id="timer"></div>
+
+    <div class="card" id="phase-guess">
+      <div class="qtext" id="q-text"></div>
+      <input type="text" id="guess-input" placeholder="ta réponse">
+      <div class="btn-row"><button class="btn" id="guess-submit">Valider</button></div>
+    </div>
+
+    <div class="card" id="phase-reveal1" style="display:none;">
+      <div class="qtext" id="q-text-r1"></div>
+      <div class="reveal-row">
+        <div class="reveal-box"><span class="label">ta réponse</span><span class="value" id="her-guess-display"></span></div>
+        <div class="reveal-box"><span class="label">sa vraie réponse</span><span class="value" id="his-real-display"></span></div>
+      </div>
+      <div class="btn-row"><button class="btn" id="to-reveal2">Suite</button></div>
+    </div>
+
+    <div class="card" id="phase-reveal2" style="display:none;">
+      <div class="qtext">Ce que je pensais de toi :</div>
+      <div class="reveal-box" style="margin-bottom:0.8rem;"><span class="value" id="his-guess-display"></span></div>
+      <div class="btn-row" id="vf-buttons">
+        <button class="btn" id="btn-vrai">Vrai</button>
+        <button class="btn ghost" id="btn-faux">Faux</button>
+      </div>
+      <div id="correction" style="display:none; margin-top:0.8rem;">
+        <input type="text" id="correction-input" placeholder="ta vraie réponse, alors ?">
+        <div class="btn-row"><button class="btn" id="correction-submit">Valider</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="done">
+    <div class="card">
+      <p style="font-family:'Caveat', cursive; font-size:1.6rem; color:var(--ink);">Fini !</p>
+      <p>On regardera ensemble ce que ça donne.</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="week4-data.js"></script>
+<script>
+  const TIME_LIMIT = 30; // secondes par question — change ici si tu veux 45 ou 60
+
+  let db = null;
+  try{ firebase.initializeApp(firebaseConfig); db = firebase.firestore(); }catch(e){}
+
+  let idx = 0;
+  let timeLeft = TIME_LIMIT;
+  let timerInterval;
+
+  const progressEl = document.getElementById('progress');
+  const timerEl = document.getElementById('timer');
+  const phaseGuess = document.getElementById('phase-guess');
+  const phaseReveal1 = document.getElementById('phase-reveal1');
+  const phaseReveal2 = document.getElementById('phase-reveal2');
+  const gameEl = document.getElementById('game');
+  const doneEl = document.getElementById('done');
+
+  function fallback(v){ return (v && v.trim()) ? v : "(pas encore rempli)"; }
+
+  function startQuestion(){
+    if(idx >= QUESTIONS.length){ gameEl.style.display='none'; doneEl.style.display='block'; return; }
+    const q = QUESTIONS[idx];
+    progressEl.textContent = `question ${idx+1} / ${QUESTIONS.length}`;
+    phaseGuess.style.display='block'; phaseReveal1.style.display='none'; phaseReveal2.style.display='none';
+    document.getElementById('q-text').textContent = q.text;
+    document.getElementById('guess-input').value = '';
+    timeLeft = TIME_LIMIT;
+    timerEl.textContent = timeLeft + 's';
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      timerEl.textContent = timeLeft + 's';
+      if(timeLeft <= 0){ clearInterval(timerInterval); submitGuess(); }
+    }, 1000);
+  }
+
+  function saveToFirestore(qid, data){
+    if(!db) return;
+    db.collection('week4').doc('q'+qid).set(data, {merge:true}).catch(()=>{});
+  }
+
+  function submitGuess(){
+    clearInterval(timerInterval);
+    const q = QUESTIONS[idx];
+    const guess = document.getElementById('guess-input').value.trim();
+    saveToFirestore(q.id, { guessAboutHim: guess });
+    document.getElementById('q-text-r1').textContent = q.text;
+    document.getElementById('her-guess-display').textContent = fallback(guess);
+    document.getElementById('his-real-display').textContent = fallback(q.hisReal);
+    phaseGuess.style.display='none'; phaseReveal1.style.display='block';
+  }
+  document.getElementById('guess-submit').addEventListener('click', submitGuess);
+
+  document.getElementById('to-reveal2').addEventListener('click', () => {
+    const q = QUESTIONS[idx];
+    document.getElementById('his-guess-display').textContent = fallback(q.hisGuessAboutHer);
+    document.getElementById('correction').style.display='none';
+    document.getElementById('vf-buttons').style.display='flex';
+    phaseReveal1.style.display='none'; phaseReveal2.style.display='block';
+  });
+
+  document.getElementById('btn-vrai').addEventListener('click', () => {
+    const q = QUESTIONS[idx];
+    saveToFirestore(q.id, { verdict:'vrai', herRealAnswer: q.hisGuessAboutHer });
+    idx++; startQuestion();
+  });
+
+  document.getElementById('btn-faux').addEventListener('click', () => {
+    document.getElementById('vf-buttons').style.display='none';
+    document.getElementById('correction').style.display='block';
+  });
+
+  document.getElementById('correction-submit').addEventListener('click', () => {
+    const q = QUESTIONS[idx];
+    const val = document.getElementById('correction-input').value.trim();
+    saveToFirestore(q.id, { verdict:'faux', herRealAnswer: val });
+    document.getElementById('correction-input').value = '';
+    idx++; startQuestion();
+  });
+
+  startQuestion();
+</script>
+
+</body>
+</html>
