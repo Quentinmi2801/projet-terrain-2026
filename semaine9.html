@@ -45,14 +45,14 @@
   <a class="back" href="index.html">retour au carnet</a>
   <h1>À ton tour</h1>
 
-  <div id="panel-explain" class="card">
+  <div id="panel-explain" class="card" style="display:none;">
     <p>Ça y est, c'est ton tour.</p>
     <p>Depuis le début de l'été, j'ai rempli ce carnet de plein de choses — des mots, des sons, des images, des petites quêtes. Cette semaine, je te laisse la main. À toi d'imaginer quelque chose, comme tu le sens.</p>
     <p>Texte, audio, vidéo — le format est complètement libre, c'est toi qui choisis. Prends le temps qu'il te faut, tu as jusqu'au 23 août.</p>
     <p>Et pour que ça reste une vraie surprise : je ne verrai rien de ce que tu déposes avant cette date-là, même si tu envoies tout dès aujourd'hui.</p>
   </div>
 
-  <div id="panel-form" class="card">
+  <div id="panel-form" class="card" style="display:none;">
     <div class="type-row">
       <button class="type-btn active" data-type="texte">Texte</button>
       <button class="type-btn" data-type="audio">Audio</button>
@@ -70,7 +70,14 @@
     <div class="status" id="status"></div>
   </div>
 
-  <div id="panel-locked" class="card">
+  <div id="panel-current" class="card" style="display:none;">
+    <p>Tu as déjà déposé quelque chose :</p>
+    <div id="current-content"></div>
+    <button class="btn" id="delete-btn" style="margin-top:1rem; background:var(--stamp);">Supprimer et recommencer</button>
+    <div class="status" id="delete-status"></div>
+  </div>
+
+  <div id="panel-locked" class="card" style="display:none;">
     <p>C'est bien reçu — merci. On se retrouve après le 23 août pour la suite.</p>
   </div>
 
@@ -101,6 +108,7 @@
 
   const panelExplain = document.getElementById('panel-explain');
   const panelForm = document.getElementById('panel-form');
+  const panelCurrent = document.getElementById('panel-current');
   const panelLocked = document.getElementById('panel-locked');
   const panelReveal = document.getElementById('panel-reveal');
   const panelWait = document.getElementById('panel-wait');
@@ -109,8 +117,6 @@
 
   if(role === 'admin'){
     // Ton côté à toi : jamais le formulaire, seulement l'attente ou la révélation.
-    panelExplain.style.display = 'none';
-    panelForm.style.display = 'none';
     if(revealReady){
       showReveal();
     } else {
@@ -118,8 +124,49 @@
       panelWait.style.display = 'block';
     }
   } else {
-    // Son côté à elle : explication + formulaire, tout le temps disponible.
+    // Son côté à elle : vérifie s'il y a déjà un dépôt, sinon affiche le formulaire.
+    checkExistingSubmission();
   }
+
+  function renderPreview(container, d){
+    let html = '';
+    if(d.type === 'texte'){ html = d.content.split('\n\n').map(p => `<p>${p}</p>`).join(''); }
+    else if(d.type === 'audio'){ html = `<audio controls src="${d.url}"></audio>`; }
+    else if(d.type === 'video'){ html = `<video controls src="${d.url}"></video>`; }
+    container.innerHTML = html;
+  }
+
+  function checkExistingSubmission(){
+    if(!db){ panelExplain.style.display='block'; panelForm.style.display='block'; return; }
+    db.collection('week9').doc('submission').get().then(doc => {
+      if(doc.exists){
+        renderPreview(document.getElementById('current-content'), doc.data());
+        panelCurrent.style.display = 'block';
+      } else {
+        panelExplain.style.display='block'; panelForm.style.display='block';
+      }
+    }).catch(() => { panelExplain.style.display='block'; panelForm.style.display='block'; });
+  }
+
+  document.getElementById('delete-btn').addEventListener('click', async () => {
+    const statusEl = document.getElementById('delete-status');
+    statusEl.textContent = 'Suppression...';
+    try{
+      const doc = await db.collection('week9').doc('submission').get();
+      if(doc.exists){
+        const d = doc.data();
+        if((d.type === 'audio' || d.type === 'video') && d.url){
+          try{ await storage.refFromURL(d.url).delete(); }catch(e){}
+        }
+      }
+      await db.collection('week9').doc('submission').delete();
+      panelCurrent.style.display = 'none';
+      panelExplain.style.display = 'block';
+      panelForm.style.display = 'block';
+    } catch(e){
+      statusEl.textContent = "Ça n'a pas fonctionné, réessaie.";
+    }
+  });
 
   function showReveal(){
     if(!db) return;

@@ -266,7 +266,12 @@
   function checkWin(){
     const solved = tiles.every((v,i) => v === i);
     if(solved){
-      setTimeout(() => { clearInterval(timerInterval); showStep('finale'); fireLoveExplosion(); }, 400);
+      setTimeout(() => {
+        clearInterval(timerInterval);
+        if(playing){ bgm.pause(); bgm.currentTime = 0; playing = false; audioBtn.textContent = '🔈'; }
+        showStep('finale');
+        fireLoveExplosion();
+      }, 400);
     }
   }
 
