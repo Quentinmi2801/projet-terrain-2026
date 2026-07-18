@@ -100,7 +100,7 @@ const ENTRIES = [
   },
   {
     id: 9,
-    unlock: '2026-08-16',
+    unlock: '2026-07-01',
     title: 'Semaine 9 — à ton tour',
     teaser: 'Cette fois, c\'est toi qui déposes quelque chose.',
     type: 'her-turn',
