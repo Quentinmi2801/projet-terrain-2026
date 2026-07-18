@@ -21,7 +21,7 @@ const QUESTIONS = [
   { id: 7,  text: "Quelle est ma couleur préférée ?", hisReal: "le bleu", hisGuessAboutHer: "le bleu" },
   { id: 8,  text: "Combien j'ai de frères et sœurs ?", hisReal: "aucun", hisGuessAboutHer: "elle a une sœur" },
   { id: 9,  text: "Quel super-pouvoir je choisirais ?", hisReal: "voler", hisGuessAboutHer: "voler" },
-  { id: 10, text: "Quelle est ma chanson préférée en ce moment ?", hisReal: "Love Me Not — Ravyn Lenae", hisGuessAboutHer: "aucune idée, je donne ma langue au chat" },
+  { id: 10, text: "Quelle est ma chanson préférée en ce moment ?", hisReal: "Love Me Not, de Ravyn Lenae", hisGuessAboutHer: "aucune idée, je donne ma langue au chat" },
   { id: 11, text: "Quel est mon petit plaisir coupable ?", hisReal: "manger du chocolat", hisGuessAboutHer: "me taquiner, m'embêter un peu" },
   { id: 12, text: "Quel pays je rêve de visiter ?", hisReal: "l'île de la Réunion", hisGuessAboutHer: "la Norvège" },
   { id: 13, text: "Quelle est ma plus grande peur (une légère, pas lourde) ?", hisReal: "la claustrophobie", hisGuessAboutHer: "l'échec, ne pas réussir" },

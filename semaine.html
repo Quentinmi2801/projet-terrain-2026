@@ -70,6 +70,16 @@
 
   .gallery-grid{ display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-top:1rem; }
   .gallery-grid img{ width:100%; border-radius:8px 3px 8px 3px; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+
+  @media (min-width:700px){
+    .page{ max-width:760px; padding-top:3rem; }
+    .cal-grid{ grid-template-columns:repeat(3, 1fr); }
+    .cal-cell:nth-child(7){ grid-column:auto; }
+    .gallery-grid{ grid-template-columns:repeat(3, 1fr); }
+  }
+  @media (min-width:1000px){
+    .page{ max-width:880px; }
+  }
 </style>
 </head>
 <body>
@@ -80,7 +90,7 @@
   <a class="back" href="index.html">retour au carnet</a>
   <div id="week"></div>
 </div>
-<script src="entries.js?v=12"></script>
+<script src="entries.js?v=13"></script>
 <script>
   const params = new URLSearchParams(window.location.search);
   const id = parseInt(params.get('id'), 10);
@@ -120,7 +130,7 @@
   if(!entry){
     wrap.innerHTML = `<div id="notfound">Cette page n'existe pas (encore).</div>`;
   } else if(sessionStorage.getItem('carnet-role') !== 'admin' && now < new Date(entry.unlock + 'T00:00:00')){
-    wrap.innerHTML = `<div id="notfound">Pas encore — reviens le ${new Date(entry.unlock).toLocaleDateString('fr-FR',{day:'numeric',month:'long'})}.</div>`;
+    wrap.innerHTML = `<div id="notfound">Pas encore, reviens le ${new Date(entry.unlock).toLocaleDateString('fr-FR',{day:'numeric',month:'long'})}.</div>`;
   } else {
     wrap.innerHTML = `
       <h1>${entry.title}</h1>

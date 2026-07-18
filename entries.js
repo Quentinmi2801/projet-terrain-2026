@@ -20,7 +20,7 @@ const ENTRIES = [
   {
     id: 1,
     unlock: '2026-06-28',
-    title: 'Semaine 1 — la première sans toi',
+    title: 'Semaine 1 · la première sans toi',
     teaser: 'Un mot, et ce qui s\'est passé cette semaine-là.',
     type: 'audio',
     content: 'semaine1.m4a',
@@ -32,7 +32,7 @@ const ENTRIES = [
   {
     id: 2,
     unlock: '2026-07-05',
-    title: 'Semaine 2 — notre année en une semaine',
+    title: 'Semaine 2 · notre année en une semaine',
     teaser: 'Sept jours, sept images, une année entière.',
     type: 'calendar',
     content: ['semaine2-jour1.jpg','semaine2-jour2.jpg','semaine2-jour3.jpg','semaine2-jour4.jpg','semaine2-jour5.jpg','semaine2-jour6.jpg','semaine2-jour7.jpg'],
@@ -42,7 +42,7 @@ const ENTRIES = [
   {
     id: 3,
     unlock: '2026-07-12',
-    title: 'Semaine 3 — cherche un peu',
+    title: 'Semaine 3 · cherche un peu',
     teaser: 'Une petite quête, à résoudre contre la montre.',
     type: 'escape',
     // Page dédiée : escape.html (pas le gabarit semaine.html). Contenu des épreuves à personnaliser dedans.
@@ -52,7 +52,7 @@ const ENTRIES = [
   {
     id: 4,
     unlock: '2026-07-19',
-    title: 'Semaine 4 — devine un peu',
+    title: 'Semaine 4 · devine un peu',
     teaser: "On parie sur ce que l'autre préfère.",
     type: 'pending',
     // EN ATTENTE : la liste de catégories (voir message du jour) + tes réponses réelles ET tes suppositions sur elle.
@@ -62,7 +62,7 @@ const ENTRIES = [
   {
     id: 5,
     unlock: '2026-07-26',
-    title: 'Semaine 5 — écoute ça',
+    title: 'Semaine 5 · écoute ça',
     teaser: 'Une chanson, pour toi.',
     type: 'video',
     // À FOURNIR : la chanson interprétée (vidéo ou audio — change le type en 'audio' si besoin), une fois choisie.
@@ -72,7 +72,7 @@ const ENTRIES = [
   {
     id: 6,
     unlock: '2026-08-02',
-    title: 'Semaine 6 — quelque chose arrive',
+    title: 'Semaine 6 · quelque chose arrive',
     teaser: 'Regarde plutôt du côté de ta boîte aux lettres.',
     type: 'text',
     content: "Cette semaine, la surprise n'est pas sur cet écran.\n\nElle est en route vers chez toi.",
@@ -81,7 +81,7 @@ const ENTRIES = [
   {
     id: 7,
     unlock: '2026-08-09',
-    title: 'Semaine 7 — à voir',
+    title: 'Semaine 7 · à voir',
     teaser: '...',
     type: 'pending',
     // OUVERT — encore à définir ensemble (les flashcards restent une piste possible ici).
@@ -91,7 +91,7 @@ const ENTRIES = [
   {
     id: 8,
     unlock: '2026-08-16',
-    title: 'Semaine 8 — un bout de ma semaine',
+    title: 'Semaine 8 · un bout de ma semaine',
     teaser: 'Quelques jours de ma vie, filmés pour toi.',
     type: 'video',
     // À FOURNIR : les rushs bruts si tu veux qu'on t'aide au montage, ou la vidéo déjà montée.
@@ -101,7 +101,7 @@ const ENTRIES = [
   {
     id: 9,
     unlock: '2026-07-01',
-    title: 'Semaine 9 — à ton tour',
+    title: 'Semaine 9 · à ton tour',
     teaser: 'Cette fois, c\'est toi qui déposes quelque chose.',
     type: 'her-turn',
     // Page dédiée : semaine9.html. Se débloque en même temps que la semaine 8.
@@ -112,7 +112,7 @@ const ENTRIES = [
   {
     id: 10,
     unlock: '2026-08-26',
-    title: 'Semaine 10 — presque',
+    title: 'Semaine 10 · presque',
     teaser: 'Les dernières heures, comptées une par une.',
     type: 'text',
     // Le compte à rebours en heures (vers 20h le 27 août) est géré à part dans index/semaine —

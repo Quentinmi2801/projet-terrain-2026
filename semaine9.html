@@ -37,6 +37,13 @@
 
   .reveal-card audio, .reveal-card video, .reveal-card img{ width:100%; border-radius:8px; margin-top:0.6rem; }
   #panel-locked{ display:none; }
+
+  @media (min-width:700px){
+    .page{ max-width:720px; padding-top:3rem; }
+  }
+  @media (min-width:1000px){
+    .page{ max-width:820px; }
+  }
 </style>
 </head>
 <body>
@@ -47,8 +54,8 @@
 
   <div id="panel-explain" class="card" style="display:none;">
     <p>Ça y est, c'est ton tour.</p>
-    <p>Depuis le début de l'été, j'ai rempli ce carnet de plein de choses — des mots, des sons, des images, des petites quêtes. Cette semaine, je te laisse la main. À toi d'imaginer quelque chose, comme tu le sens.</p>
-    <p>Texte, audio, vidéo — le format est complètement libre, c'est toi qui choisis. Prends le temps qu'il te faut, tu as jusqu'au 23 août.</p>
+    <p>Depuis le début de l'été, j'ai rempli ce carnet de plein de choses, des mots, des sons, des images, des petites quêtes. Cette semaine, je te laisse la main. À toi d'imaginer quelque chose, comme tu le sens.</p>
+    <p>Texte, audio, vidéo, le format est complètement libre, c'est toi qui choisis. Prends le temps qu'il te faut, tu as jusqu'au 23 août.</p>
     <p>Et pour que ça reste une vraie surprise : je ne verrai rien de ce que tu déposes avant cette date-là, même si tu envoies tout dès aujourd'hui.</p>
   </div>
 
@@ -78,7 +85,7 @@
   </div>
 
   <div id="panel-locked" class="card" style="display:none;">
-    <p>C'est bien reçu — merci. On se retrouve après le 23 août pour la suite.</p>
+    <p>C'est bien reçu, merci. On se retrouve après le 23 août pour la suite.</p>
   </div>
 
   <div id="panel-reveal" style="display:none;">
@@ -214,7 +221,7 @@
       panelForm.style.display = 'none';
       panelLocked.style.display = 'block';
     } catch(e){
-      statusEl.textContent = "Ça n'a pas fonctionné — réessaie, ou dis-le à Quentin.";
+      statusEl.textContent = "Ça n'a pas fonctionné, réessaie, ou dis-le à Quentin.";
     }
   });
 </script>

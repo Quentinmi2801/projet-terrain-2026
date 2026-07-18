@@ -68,6 +68,14 @@
     0%{ transform:translate(-50%,-50%) translate(0,0) scale(0.5) rotate(0deg); opacity:1; }
     100%{ transform:translate(-50%,-50%) translate(var(--dx), var(--dy)) scale(1.3) rotate(var(--rot)); opacity:0; }
   }
+
+  @media (min-width:700px){
+    .page{ max-width:760px; padding-top:3rem; }
+    .taquin{ max-width:340px; }
+  }
+  @media (min-width:1000px){
+    .page{ max-width:860px; }
+  }
 </style>
 </head>
 <body>
@@ -100,7 +108,7 @@
 
     <div id="step1" class="step-inner active">
       <div class="card">
-        <span style="font-family:'IBM Plex Mono', monospace; font-size:0.65rem; color:var(--sage);">ÉPREUVE 1 — DEVINETTE</span>
+        <span style="font-family:'IBM Plex Mono', monospace; font-size:0.65rem; color:var(--sage);">ÉPREUVE 1 · DEVINETTE</span>
         <p>Quel point commun y a-t-il entre l'amour et un cactus ?</p>
         <input type="text" id="answer1" placeholder="ta réponse">
         <div class="feedback" id="feedback1"></div>
@@ -110,7 +118,7 @@
 
     <div id="step2" class="step-inner">
       <div class="card">
-        <span style="font-family:'IBM Plex Mono', monospace; font-size:0.65rem; color:var(--sage);">ÉPREUVE 2 — RÉBUS</span>
+        <span style="font-family:'IBM Plex Mono', monospace; font-size:0.65rem; color:var(--sage);">ÉPREUVE 2 · RÉBUS</span>
         <img src="escape-rebus.jpg" alt="rébus" style="width:100%; border-radius:8px; margin:0.6rem 0;">
         <input type="text" id="answer2" placeholder="ta réponse">
         <div class="feedback" id="feedback2"></div>
@@ -120,7 +128,7 @@
 
     <div id="step3" class="step-inner">
       <div class="card">
-        <span style="font-family:'IBM Plex Mono', monospace; font-size:0.65rem; color:var(--sage);">ÉPREUVE 3 — TAQUIN</span>
+        <span style="font-family:'IBM Plex Mono', monospace; font-size:0.65rem; color:var(--sage);">ÉPREUVE 3 · TAQUIN</span>
         <p>Reconstitue l'image en glissant les cases.</p>
         <!-- À PERSONNALISER : remplace escape-puzzle.jpg par une de vos photos -->
         <div class="taquin" id="taquin"></div>
@@ -200,7 +208,7 @@
       document.getElementById('feedback1').textContent = "Oui !";
       setTimeout(() => goToInnerStep('step2'), 500);
     } else {
-      document.getElementById('feedback1').textContent = "Pas tout à fait — réessaie.";
+      document.getElementById('feedback1').textContent = "Pas tout à fait, réessaie.";
     }
   });
 
@@ -211,7 +219,7 @@
       document.getElementById('feedback2').textContent = "Exactement !";
       setTimeout(() => goToInnerStep('step3'), 500);
     } else {
-      document.getElementById('feedback2').textContent = "Pas tout à fait — réessaie.";
+      document.getElementById('feedback2').textContent = "Pas tout à fait, réessaie.";
     }
   });
 
