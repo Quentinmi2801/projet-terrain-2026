@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Une petite quête</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --paper:#EDE3CC; --ink:#1B2A4A; --ink-soft:#334463; --sage:#6E8B7A; --stamp:#B24C3A; --gold:#C99A3E; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    background:
+      linear-gradient(rgba(27,42,74,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(27,42,74,0.05) 1px, transparent 1px),
+      var(--paper);
+    background-size:22px 22px, 22px 22px, auto;
+    color:var(--ink-soft); font-family:'Source Serif 4', serif; line-height:1.6; min-height:100svh;
+  }
+  .page{ max-width:600px; margin:0 auto; padding:2rem 1.3rem 4rem; }
+  a.back{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; color:var(--ink); text-decoration:none; display:inline-block; margin-bottom:1rem; }
+  a.back:before{ content:"← "; }
+  h1{ font-family:'Caveat', cursive; font-size:2rem; color:var(--ink); text-align:center; margin-bottom:0.6rem; }
+  p{ margin-bottom:0.9rem; }
+
+  .card{ border:1.5px solid rgba(27,42,74,0.2); background:rgba(255,255,255,0.35); border-radius:18px 8px 20px 10px; padding:1.4rem 1.2rem; margin-bottom:1.2rem; }
+
+  #timer{ text-align:center; font-family:'Caveat', cursive; font-size:2.4rem; color:var(--stamp); margin:0.6rem 0; }
+  #timer.warn{ color:#8a1f1f; }
+
+  .btn{ all:unset; cursor:pointer; display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:0.8rem; letter-spacing:0.05em; text-transform:uppercase; background:var(--ink); color:var(--paper); padding:0.7rem 1.3rem; border-radius:16px 6px 16px 6px; }
+  .btn:active{ transform:scale(0.97); }
+
+  #audio-toggle{ position:fixed; top:1rem; right:1rem; font-size:1.3rem; background:none; border:none; cursor:pointer; z-index:20; }
+
+  input[type="text"]{ width:100%; font-family:'Source Serif 4', serif; font-size:1rem; padding:0.6rem 0.8rem; border:1px solid rgba(27,42,74,0.3); border-radius:10px; background:var(--paper); margin:0.6rem 0; }
+  .feedback{ font-family:'IBM Plex Mono', monospace; font-size:0.75rem; min-height:1.2em; color:var(--stamp); }
+
+  .taquin{ display:grid; grid-template-columns:repeat(3, 1fr); gap:3px; max-width:280px; margin:1rem auto; background:var(--ink); padding:3px; border-radius:8px; }
+  .tile{ aspect-ratio:1; background-size:280px 280px; cursor:pointer; }
+  .tile.blank{ background:var(--paper); cursor:default; }
+
+  .step{ display:none; }
+  .step.active{ display:block; }
+
+  .finale-photo{ width:100%; border-radius:10px 4px 10px 4px; box-shadow:0 12px 30px rgba(0,0,0,0.25); margin:1rem 0; }
+  .finale-word{ font-family:'Caveat', cursive; font-size:1.6rem; color:var(--stamp); text-align:center; }
+</style>
+</head>
+<body>
+
+<button id="audio-toggle">🔈</button>
+<audio id="bgm" loop>
+  <!-- À REMPLACER : mets ici un fichier audio libre de droits, ex. escape-ambiance.mp3, à côté de ce fichier -->
+  <source src="escape-ambiance.mp3" type="audio/mpeg">
+</audio>
+
+<div class="page">
+  <a class="back" href="index.html">retour au carnet</a>
+
+  <div id="locked" class="step">
+    <h1>Pas encore</h1>
+    <p style="text-align:center;">Reviens le <span id="unlock-date"></span>.</p>
+  </div>
+
+  <div id="intro" class="step">
+    <h1>Une petite quête</h1>
+    <div class="card">
+      <p>Trois épreuves t'attendent. Rien de bien méchant — juste de quoi te faire chercher un peu avant la récompense.</p>
+      <p>Tu as 30 minutes. C'est très large, mais on aime bien le compte à rebours.</p>
+      <p style="text-align:center;"><button class="btn" id="start-btn">Commencer</button></p>
+    </div>
+  </div>
+
+  <div id="game" class="step">
+    <div id="timer">30:00</div>
+
+    <div id="step1" class="step-inner active">
+      <div class="card">
+        <span style="font-family:'IBM Plex Mono', monospace; font-size:0.65rem; color:var(--sage);">ÉPREUVE 1 — TEXTE À TROUS</span>
+        <!-- À PERSONNALISER : la phrase à trous et la réponse attendue -->
+        <p>Complète : "Le jour où tout a commencé, on était à la ___."</p>
+        <input type="text" id="answer1" placeholder="ta réponse">
+        <div class="feedback" id="feedback1"></div>
+        <button class="btn" id="check1">Valider</button>
+      </div>
+    </div>
+
+    <div id="step2" class="step-inner">
+      <div class="card">
+        <span style="font-family:'IBM Plex Mono', monospace; font-size:0.65rem; color:var(--sage);">ÉPREUVE 2 — RÉBUS</span>
+        <!-- À PERSONNALISER : le rébus et sa réponse -->
+        <p style="font-size:1.8rem; text-align:center;">🐚 + 🌊 = ?</p>
+        <input type="text" id="answer2" placeholder="ta réponse">
+        <div class="feedback" id="feedback2"></div>
+        <button class="btn" id="check2">Valider</button>
+      </div>
+    </div>
+
+    <div id="step3" class="step-inner">
+      <div class="card">
+        <span style="font-family:'IBM Plex Mono', monospace; font-size:0.65rem; color:var(--sage);">ÉPREUVE 3 — TAQUIN</span>
+        <p>Reconstitue l'image en glissant les cases.</p>
+        <!-- À PERSONNALISER : remplace escape-puzzle.jpg par une de vos photos -->
+        <div class="taquin" id="taquin"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="finale" class="step">
+    <h1>Trouvé.</h1>
+    <div class="card" style="text-align:center;">
+      <!-- À PERSONNALISER : la photo/mot exclusif, visible nulle part ailleurs sur le site -->
+      <img class="finale-photo" src="escape-finale.jpg" alt="">
+      <p class="finale-word">[Le mot caché va ici.]</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---- Vérrouillage par date (même logique que le reste du site) ----
+  const UNLOCK = '2026-07-12';
+  const now = new Date();
+  document.getElementById('unlock-date').textContent = new Date(UNLOCK).toLocaleDateString('fr-FR', {day:'numeric', month:'long'});
+
+  const steps = { locked: document.getElementById('locked'), intro: document.getElementById('intro'), game: document.getElementById('game'), finale: document.getElementById('finale') };
+  function showStep(name){ Object.values(steps).forEach(s => s.classList.remove('active')); steps[name].classList.add('active'); }
+
+  if(sessionStorage.getItem('carnet-role') !== 'admin' && now < new Date(UNLOCK + 'T00:00:00')){
+    showStep('locked');
+  } else {
+    showStep('intro');
+  }
+
+  // ---- Audio ----
+  const bgm = document.getElementById('bgm');
+  const audioBtn = document.getElementById('audio-toggle');
+  let playing = false;
+  audioBtn.addEventListener('click', () => {
+    if(playing){ bgm.pause(); audioBtn.textContent = '🔈'; } else { bgm.play().catch(()=>{}); audioBtn.textContent = '🔊'; }
+    playing = !playing;
+  });
+
+  // ---- Minuteur ----
+  let timeLeft = 30 * 60;
+  const timerEl = document.getElementById('timer');
+  let timerInterval;
+  function startTimer(){
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      const m = Math.floor(timeLeft/60), s = timeLeft%60;
+      timerEl.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+      if(timeLeft <= 60) timerEl.classList.add('warn');
+      if(timeLeft <= 0){ clearInterval(timerInterval); timerEl.textContent = "Temps écoulé (mais continue quand même !)"; }
+    }, 1000);
+  }
+
+  document.getElementById('start-btn').addEventListener('click', () => {
+    showStep('game');
+    startTimer();
+    if(!playing){ bgm.play().catch(()=>{}); playing = true; audioBtn.textContent = '🔊'; }
+  });
+
+  function goToInnerStep(id){
+    document.querySelectorAll('.step-inner').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  // ---- Épreuve 1 : texte à trous ----
+  // À PERSONNALISER : la bonne réponse (insensible à la casse/accents simples)
+  const ANSWER1 = "tekiloc";
+  document.getElementById('check1').addEventListener('click', () => {
+    const val = document.getElementById('answer1').value.trim().toLowerCase();
+    if(val === ANSWER1){
+      document.getElementById('feedback1').textContent = "Oui !";
+      setTimeout(() => goToInnerStep('step2'), 500);
+    } else {
+      document.getElementById('feedback1').textContent = "Pas tout à fait — réessaie.";
+    }
+  });
+
+  // ---- Épreuve 2 : rébus ----
+  // À PERSONNALISER : la bonne réponse
+  const ANSWER2 = "roscoff";
+  document.getElementById('check2').addEventListener('click', () => {
+    const val = document.getElementById('answer2').value.trim().toLowerCase();
+    if(val === ANSWER2){
+      document.getElementById('feedback2').textContent = "Exactement !";
+      setTimeout(() => goToInnerStep('step3'), 500);
+    } else {
+      document.getElementById('feedback2').textContent = "Pas tout à fait — réessaie.";
+    }
+  });
+
+  // ---- Épreuve 3 : taquin (3x3, image à personnaliser) ----
+  const taquinEl = document.getElementById('taquin');
+  const SIZE = 3;
+  let tiles = [0,1,2,3,4,5,6,7,8]; // 8 = case vide
+
+  function renderTaquin(){
+    taquinEl.innerHTML = '';
+    tiles.forEach((val, idx) => {
+      const div = document.createElement('div');
+      if(val === 8){
+        div.className = 'tile blank';
+      } else {
+        div.className = 'tile';
+        const row = Math.floor(val/SIZE), col = val%SIZE;
+        div.style.backgroundImage = "url('escape-puzzle.jpg')";
+        div.style.backgroundPosition = `-${col*93.33}px -${row*93.33}px`;
+      }
+      div.addEventListener('click', () => tryMove(idx));
+      taquinEl.appendChild(div);
+    });
+  }
+
+  function isAdjacent(idx, blankIdx){
+    const r1 = Math.floor(idx/SIZE), c1 = idx%SIZE;
+    const r2 = Math.floor(blankIdx/SIZE), c2 = blankIdx%SIZE;
+    return (r1===r2 && Math.abs(c1-c2)===1) || (c1===c2 && Math.abs(r1-r2)===1);
+  }
+
+  function tryMove(idx){
+    const blankIdx = tiles.indexOf(8);
+    if(isAdjacent(idx, blankIdx)){
+      [tiles[idx], tiles[blankIdx]] = [tiles[blankIdx], tiles[idx]];
+      renderTaquin();
+      checkWin();
+    }
+  }
+
+  function shuffleTaquin(){
+    for(let i=0;i<200;i++){
+      const blankIdx = tiles.indexOf(8);
+      const candidates = [];
+      for(let n=0;n<9;n++){ if(isAdjacent(n, blankIdx)) candidates.push(n); }
+      const pick = candidates[Math.floor(Math.random()*candidates.length)];
+      [tiles[pick], tiles[blankIdx]] = [tiles[blankIdx], tiles[pick]];
+    }
+    renderTaquin();
+  }
+
+  function checkWin(){
+    const solved = tiles.every((v,i) => v === i);
+    if(solved){
+      setTimeout(() => { clearInterval(timerInterval); showStep('finale'); }, 400);
+    }
+  }
+
+  shuffleTaquin();
+</script>
+
+</body>
+</html>
