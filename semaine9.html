@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>À ton tour</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --paper:#EDE3CC; --ink:#1B2A4A; --ink-soft:#334463; --sage:#6E8B7A; --stamp:#B24C3A; --gold:#C99A3E; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    background:
+      linear-gradient(rgba(27,42,74,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(27,42,74,0.05) 1px, transparent 1px),
+      var(--paper);
+    background-size:22px 22px, 22px 22px, auto;
+    color:var(--ink-soft); font-family:'Source Serif 4', serif; line-height:1.6; min-height:100svh;
+  }
+  .page{ max-width:600px; margin:0 auto; padding:2rem 1.3rem 4rem; }
+  a.back{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; color:var(--ink); text-decoration:none; display:inline-block; margin-bottom:1rem; }
+  a.back:before{ content:"← "; }
+  h1{ font-family:'Caveat', cursive; font-size:2rem; color:var(--ink); text-align:center; margin-bottom:0.8rem; }
+  p{ margin-bottom:0.9rem; }
+
+  .card{ border:1.5px solid rgba(27,42,74,0.2); background:rgba(255,255,255,0.35); border-radius:18px 8px 20px 10px; padding:1.4rem 1.2rem; margin-bottom:1.2rem; }
+
+  .type-row{ display:flex; gap:0.5rem; margin-bottom:0.8rem; flex-wrap:wrap; }
+  .type-btn{ all:unset; cursor:pointer; flex:1; text-align:center; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; padding:0.6rem; border:1.5px solid rgba(27,42,74,0.3); border-radius:10px; }
+  .type-btn.active{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+
+  textarea{ width:100%; min-height:120px; font-family:'Source Serif 4', serif; font-size:1rem; padding:0.7rem; border:1px solid rgba(27,42,74,0.3); border-radius:10px; background:var(--paper); margin-bottom:0.8rem; resize:vertical; }
+  input[type="file"]{ width:100%; margin-bottom:0.8rem; font-family:'IBM Plex Mono', monospace; font-size:0.8rem; }
+
+  .btn{ all:unset; cursor:pointer; display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:0.8rem; letter-spacing:0.05em; text-transform:uppercase; background:var(--ink); color:var(--paper); padding:0.7rem 1.3rem; border-radius:16px 6px 16px 6px; }
+  .status{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; margin-top:0.6rem; min-height:1.2em; color:var(--stamp); }
+
+  .reveal-card audio, .reveal-card video, .reveal-card img{ width:100%; border-radius:8px; margin-top:0.6rem; }
+  #panel-locked{ display:none; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <a class="back" href="index.html">retour au carnet</a>
+  <h1>À ton tour</h1>
+
+  <div id="panel-explain" class="card">
+    <p>Cette semaine, c'est la tienne.</p>
+    <p>Depuis le début, chaque case vient de moi. Celle-là, je te la laisse : un texte, un son, une vidéo — ce que tu veux, ce que tu as envie de déposer pour moi. Tu as jusqu'au 23 août pour t'y mettre, pas besoin de te presser.</p>
+    <p>Et pour que la surprise reste entière des deux côtés : je ne verrai rien de ce que tu déposes avant cette date, même si tu envoies tout dès demain.</p>
+  </div>
+
+  <div id="panel-form" class="card">
+    <div class="type-row">
+      <button class="type-btn active" data-type="texte">Texte</button>
+      <button class="type-btn" data-type="audio">Audio</button>
+      <button class="type-btn" data-type="video">Vidéo</button>
+    </div>
+
+    <div id="field-texte">
+      <textarea id="text-input" placeholder="écris ce que tu veux ici..."></textarea>
+    </div>
+    <div id="field-file" style="display:none;">
+      <input type="file" id="file-input" accept="audio/*,video/*">
+    </div>
+
+    <button class="btn" id="submit-btn">Déposer</button>
+    <div class="status" id="status"></div>
+  </div>
+
+  <div id="panel-locked" class="card">
+    <p>C'est bien reçu — merci. On se retrouve après le 23 août pour la suite.</p>
+  </div>
+
+  <div id="panel-reveal" style="display:none;">
+    <div class="card reveal-card" id="reveal-content"></div>
+  </div>
+
+  <div id="panel-wait" class="card" style="display:none;">
+    <p>Elle prépare quelque chose. Reviens le <span id="wait-date"></span>.</p>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+  const REVEAL_DATE = '2026-08-23T00:00:00';
+  const now = new Date();
+  const role = sessionStorage.getItem('carnet-role');
+
+  let db = null, storage = null;
+  try{
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    storage = firebase.storage();
+  }catch(e){}
+
+  const panelExplain = document.getElementById('panel-explain');
+  const panelForm = document.getElementById('panel-form');
+  const panelLocked = document.getElementById('panel-locked');
+  const panelReveal = document.getElementById('panel-reveal');
+  const panelWait = document.getElementById('panel-wait');
+
+  const revealReady = now >= new Date(REVEAL_DATE);
+
+  if(role === 'admin'){
+    // Ton côté à toi : jamais le formulaire, seulement l'attente ou la révélation.
+    panelExplain.style.display = 'none';
+    panelForm.style.display = 'none';
+    if(revealReady){
+      showReveal();
+    } else {
+      document.getElementById('wait-date').textContent = new Date(REVEAL_DATE).toLocaleDateString('fr-FR', {day:'numeric', month:'long'});
+      panelWait.style.display = 'block';
+    }
+  } else {
+    // Son côté à elle : explication + formulaire, tout le temps disponible.
+  }
+
+  function showReveal(){
+    if(!db) return;
+    db.collection('week9').doc('submission').get().then(doc => {
+      if(!doc.exists){ panelWait.style.display='block'; return; }
+      const d = doc.data();
+      let html = '';
+      if(d.type === 'texte'){ html = d.content.split('\n\n').map(p => `<p>${p}</p>`).join(''); }
+      else if(d.type === 'audio'){ html = `<audio controls src="${d.url}"></audio>`; }
+      else if(d.type === 'video'){ html = `<video controls src="${d.url}"></video>`; }
+      document.getElementById('reveal-content').innerHTML = html;
+      panelReveal.style.display = 'block';
+    }).catch(()=>{});
+  }
+
+  // ---- formulaire (côté Arwen) ----
+  let currentType = 'texte';
+  document.querySelectorAll('.type-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentType = btn.dataset.type;
+      document.getElementById('field-texte').style.display = currentType === 'texte' ? 'block' : 'none';
+      document.getElementById('field-file').style.display = currentType !== 'texte' ? 'block' : 'none';
+    });
+  });
+
+  document.getElementById('submit-btn').addEventListener('click', async () => {
+    const statusEl = document.getElementById('status');
+    statusEl.textContent = 'Envoi...';
+    try{
+      if(currentType === 'texte'){
+        const text = document.getElementById('text-input').value.trim();
+        if(!text){ statusEl.textContent = 'Écris quelque chose avant de déposer.'; return; }
+        await db.collection('week9').doc('submission').set({ type:'texte', content:text });
+      } else {
+        const file = document.getElementById('file-input').files[0];
+        if(!file){ statusEl.textContent = 'Choisis un fichier avant de déposer.'; return; }
+        const ref = storage.ref().child('week9/' + Date.now() + '-' + file.name);
+        await ref.put(file);
+        const url = await ref.getDownloadURL();
+        await db.collection('week9').doc('submission').set({ type: currentType, url: url });
+      }
+      panelExplain.style.display = 'none';
+      panelForm.style.display = 'none';
+      panelLocked.style.display = 'block';
+    } catch(e){
+      statusEl.textContent = "Ça n'a pas fonctionné — réessaie, ou dis-le à Quentin.";
+    }
+  });
+</script>
+
+</body>
+</html>

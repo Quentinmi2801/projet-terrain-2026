@@ -100,12 +100,14 @@ const ENTRIES = [
   },
   {
     id: 9,
-    unlock: '2026-08-23',
-    title: 'Semaine 9 — encore un peu',
-    teaser: '...',
-    type: 'pending',
-    content: "Cette semaine est encore à inventer.",
-    bonus: { type: 'proverbe', text: "Le plus dur d'un chemin, ce sont souvent les derniers pas." }
+    unlock: '2026-08-16',
+    title: 'Semaine 9 — à ton tour',
+    teaser: 'Cette fois, c\'est toi qui déposes quelque chose.',
+    type: 'her-turn',
+    // Page dédiée : semaine9.html. Se débloque en même temps que la semaine 8.
+    // Ma révélation à moi n'apparaît que le 23 août, quoi qu'elle dépose et quand.
+    content: null,
+    bonus: null
   },
   {
     id: 10,
