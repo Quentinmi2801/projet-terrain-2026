@@ -105,6 +105,10 @@
   <div>
     <img id="lb-img" src="" alt="">
     <div class="lb-cap" id="lb-cap"></div>
+    <div style="text-align:center; margin-top:0.8rem;">
+      <button class="btn" id="lb-delete" style="display:none; background:var(--stamp);">Supprimer cette photo</button>
+      <div id="lb-delete-status" style="font-family:'IBM Plex Mono', monospace; font-size:0.72rem; color:#fff; margin-top:0.4rem;"></div>
+    </div>
   </div>
 </div>
 
@@ -126,33 +130,59 @@
     const lightbox = document.getElementById('lightbox');
     const lbImg = document.getElementById('lb-img');
     const lbCap = document.getElementById('lb-cap');
+    const lbDelete = document.getElementById('lb-delete');
+    const lbDeleteStatus = document.getElementById('lb-delete-status');
+    let currentDeletable = null; // { div, docId, path }
 
-    function addPolaroid(src, caption, by){
+    function addPolaroid(src, caption, by, docId, path){
       const div = document.createElement('div');
       div.className = 'polaroid';
       div.innerHTML = `<img src="${src}" alt=""><div class="cap">${caption || ''}${by ? `<span class="by">ajoutée par ${by}</span>` : ''}</div>`;
       div.addEventListener('click', () => {
         lbImg.src = src; lbCap.textContent = caption || '';
+        lbDeleteStatus.textContent = '';
+        if(docId){
+          lbDelete.style.display = 'inline-block';
+          currentDeletable = { div, docId, path };
+        } else {
+          lbDelete.style.display = 'none';
+          currentDeletable = null;
+        }
         lightbox.classList.add('open');
       });
       collage.appendChild(div);
     }
 
-    // Photos d'origine, choisies par Quentin
+    // Photos d'origine, choisies par Quentin (jamais supprimables ici)
     PHOTOS.forEach(p => addPolaroid(p.src, p.caption + (p.date ? ', '+p.date : '')));
 
-    // Photos ajoutées par vous deux, en direct
+    // Photos ajoutées par vous deux, en direct (supprimables)
     if(db){
       db.collection('library').orderBy('ts', 'asc').get().then(snap => {
         snap.forEach(doc => {
           const d = doc.data();
-          addPolaroid(d.url, d.caption, d.by);
+          addPolaroid(d.url, d.caption, d.by, doc.id, d.path);
         });
       }).catch(()=>{});
     }
 
     document.getElementById('lb-close').addEventListener('click', () => lightbox.classList.remove('open'));
     lightbox.addEventListener('click', e => { if(e.target === lightbox) lightbox.classList.remove('open'); });
+
+    lbDelete.addEventListener('click', async () => {
+      if(!currentDeletable) return;
+      lbDeleteStatus.textContent = 'Suppression...';
+      try{
+        if(currentDeletable.path){
+          try{ await supa.storage.from('carnet').remove([currentDeletable.path]); }catch(e){}
+        }
+        await db.collection('library').doc(currentDeletable.docId).delete();
+        currentDeletable.div.remove();
+        lightbox.classList.remove('open');
+      } catch(e){
+        lbDeleteStatus.textContent = "Ça n'a pas fonctionné, réessaie.";
+      }
+    });
 
     // ---- ajout d'une photo ----
     const addCard = document.getElementById('add-card');
@@ -171,7 +201,7 @@
         if(upErr) throw upErr;
         const { data: urlData } = supa.storage.from('carnet').getPublicUrl(path);
         const url = urlData.publicUrl;
-        await db.collection('library').add({ url, caption, by: who, ts: firebase.firestore.FieldValue.serverTimestamp() });
+        await db.collection('library').add({ url, path, caption, by: who, ts: firebase.firestore.FieldValue.serverTimestamp() });
         addPolaroid(url, caption, who);
         document.getElementById('photo-file').value = '';
         document.getElementById('photo-caption').value = '';
