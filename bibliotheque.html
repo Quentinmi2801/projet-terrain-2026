@@ -174,7 +174,7 @@
       lbDeleteStatus.textContent = 'Suppression...';
       try{
         if(currentDeletable.path){
-          try{ await supa.storage.from('carnet').remove([currentDeletable.path]); }catch(e){}
+          try{ await supa.storage.from('Carnet').remove([currentDeletable.path]); }catch(e){}
         }
         await db.collection('library').doc(currentDeletable.docId).delete();
         currentDeletable.div.remove();
@@ -197,9 +197,9 @@
       try{
         const who = sessionStorage.getItem('carnet-role') === 'admin' ? 'Quentin' : 'Arwen';
         const path = 'library/' + Date.now() + '-' + file.name;
-        const { error: upErr } = await supa.storage.from('carnet').upload(path, file);
+        const { error: upErr } = await supa.storage.from('Carnet').upload(path, file);
         if(upErr) throw upErr;
-        const { data: urlData } = supa.storage.from('carnet').getPublicUrl(path);
+        const { data: urlData } = supa.storage.from('Carnet').getPublicUrl(path);
         const url = urlData.publicUrl;
         await db.collection('library').add({ url, path, caption, by: who, ts: firebase.firestore.FieldValue.serverTimestamp() });
         addPolaroid(url, caption, who);

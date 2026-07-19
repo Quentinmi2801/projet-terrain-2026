@@ -166,7 +166,7 @@
       if(doc.exists){
         const d = doc.data();
         if((d.type === 'audio' || d.type === 'video' || d.type === 'document') && d.path){
-          try{ await supa.storage.from('carnet').remove([d.path]); }catch(e){}
+          try{ await supa.storage.from('Carnet').remove([d.path]); }catch(e){}
         }
       }
       await db.collection('week9').doc('submission').delete();
@@ -217,9 +217,9 @@
         const file = document.getElementById('file-input').files[0];
         if(!file){ statusEl.textContent = 'Choisis un fichier avant de déposer.'; return; }
         const path = 'week9/' + Date.now() + '-' + file.name;
-        const { error: upErr } = await supa.storage.from('carnet').upload(path, file);
+        const { error: upErr } = await supa.storage.from('Carnet').upload(path, file);
         if(upErr) throw upErr;
-        const { data: urlData } = supa.storage.from('carnet').getPublicUrl(path);
+        const { data: urlData } = supa.storage.from('Carnet').getPublicUrl(path);
         await db.collection('week9').doc('submission').set({ type: currentType, url: urlData.publicUrl, path: path });
       }
       panelExplain.style.display = 'none';
