@@ -100,18 +100,19 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="firebase-config.js"></script>
+<script src="supabase-config.js"></script>
 <script>
   const REVEAL_DATE = '2026-08-23T00:00:00';
   const now = new Date();
   const role = sessionStorage.getItem('carnet-role');
 
-  let db = null, storage = null;
+  let db = null, supa = null;
   try{
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
-    storage = firebase.storage();
+    supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }catch(e){}
 
   const panelExplain = document.getElementById('panel-explain');
@@ -164,8 +165,8 @@
       const doc = await db.collection('week9').doc('submission').get();
       if(doc.exists){
         const d = doc.data();
-        if((d.type === 'audio' || d.type === 'video' || d.type === 'document') && d.url){
-          try{ await storage.refFromURL(d.url).delete(); }catch(e){}
+        if((d.type === 'audio' || d.type === 'video' || d.type === 'document') && d.path){
+          try{ await supa.storage.from('carnet').remove([d.path]); }catch(e){}
         }
       }
       await db.collection('week9').doc('submission').delete();
@@ -215,10 +216,11 @@
       } else {
         const file = document.getElementById('file-input').files[0];
         if(!file){ statusEl.textContent = 'Choisis un fichier avant de déposer.'; return; }
-        const ref = storage.ref().child('week9/' + Date.now() + '-' + file.name);
-        await ref.put(file);
-        const url = await ref.getDownloadURL();
-        await db.collection('week9').doc('submission').set({ type: currentType, url: url });
+        const path = 'week9/' + Date.now() + '-' + file.name;
+        const { error: upErr } = await supa.storage.from('carnet').upload(path, file);
+        if(upErr) throw upErr;
+        const { data: urlData } = supa.storage.from('carnet').getPublicUrl(path);
+        await db.collection('week9').doc('submission').set({ type: currentType, url: urlData.publicUrl, path: path });
       }
       panelExplain.style.display = 'none';
       panelForm.style.display = 'none';

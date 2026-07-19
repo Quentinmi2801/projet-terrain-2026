@@ -110,16 +110,17 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="firebase-config.js"></script>
+<script src="supabase-config.js"></script>
 <script src="photos.js?v=2"></script>
 <script>
   if(sessionStorage.getItem('unlocked') !== '1'){
     document.getElementById('not-unlocked').style.display = 'block';
     document.getElementById('library-content').style.display = 'none';
   } else {
-    let db = null, storage = null;
-    try{ firebase.initializeApp(firebaseConfig); db = firebase.firestore(); storage = firebase.storage(); }catch(e){}
+    let db = null, supa = null;
+    try{ firebase.initializeApp(firebaseConfig); db = firebase.firestore(); supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }catch(e){}
 
     const collage = document.getElementById('photo-collage');
     const lightbox = document.getElementById('lightbox');
@@ -165,9 +166,11 @@
       statusEl.textContent = 'Envoi...';
       try{
         const who = sessionStorage.getItem('carnet-role') === 'admin' ? 'Quentin' : 'Arwen';
-        const ref = storage.ref().child('library/' + Date.now() + '-' + file.name);
-        await ref.put(file);
-        const url = await ref.getDownloadURL();
+        const path = 'library/' + Date.now() + '-' + file.name;
+        const { error: upErr } = await supa.storage.from('carnet').upload(path, file);
+        if(upErr) throw upErr;
+        const { data: urlData } = supa.storage.from('carnet').getPublicUrl(path);
+        const url = urlData.publicUrl;
         await db.collection('library').add({ url, caption, by: who, ts: firebase.firestore.FieldValue.serverTimestamp() });
         addPolaroid(url, caption, who);
         document.getElementById('photo-file').value = '';
