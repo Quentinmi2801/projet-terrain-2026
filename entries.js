@@ -65,7 +65,7 @@ const ENTRIES = [
     title: 'Semaine 5 · écoute ça',
     teaser: 'Une chanson, pour toi.',
     type: 'video',
-    // À FOURNIR : la chanson interprétée (vidéo ou audio — change le type en 'audio' si besoin), une fois choisie.
+    // Chanson choisie : Talking to the Moon - Bruno Mars. À FOURNIR : ta vidéo/audio une fois enregistrée.
     content: 'semaine5.mp4',
     bonus: { type: 'devinette', text: "Je n'ai pas d'image mais je te fais fermer les yeux. Qui suis-je ?" }
   },

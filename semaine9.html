@@ -174,7 +174,7 @@
       panelExplain.style.display = 'block';
       panelForm.style.display = 'block';
     } catch(e){
-      statusEl.textContent = "Ça n'a pas fonctionné, réessaie.";
+      statusEl.textContent = "Erreur : " + (e && e.message ? e.message : JSON.stringify(e));
     }
   });
 
@@ -226,7 +226,7 @@
       panelForm.style.display = 'none';
       panelLocked.style.display = 'block';
     } catch(e){
-      statusEl.textContent = "Ça n'a pas fonctionné, réessaie, ou dis-le à Quentin.";
+      statusEl.textContent = "Erreur : " + (e && e.message ? e.message : JSON.stringify(e));
     }
   });
 </script>

@@ -208,7 +208,7 @@
         statusEl.textContent = 'Ajoutée !';
         setTimeout(() => { statusEl.textContent = ''; }, 2000);
       } catch(e){
-        statusEl.textContent = "Ça n'a pas fonctionné, réessaie.";
+        statusEl.textContent = "Erreur : " + (e && e.message ? e.message : JSON.stringify(e));
       }
     });
   }
