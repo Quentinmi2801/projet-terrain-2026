@@ -152,7 +152,26 @@
       ${entry.extraAudio ? `<audio controls src="${entry.extraAudio}" style="width:100%; margin-top:0.8rem;"></audio>` : ''}
       ${entry.gallery ? `<div class="gallery-grid">${entry.gallery.map(src => `<img src="${src}" alt="">`).join('')}</div>` : ''}
       ${renderBonus(entry)}
+      ${entry.id === 10 ? `<div class="card" style="margin-top:1rem; text-align:center; border:1.5px dashed var(--stamp); border-radius:16px 6px 16px 6px; padding:1.2rem;">
+        <span style="font-family:'IBM Plex Mono', monospace; font-size:0.65rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--stamp);">avant de te retrouver</span>
+        <div id="final-countdown" style="font-family:'Caveat', cursive; font-size:2.4rem; color:var(--ink); margin-top:0.4rem;">--:--:--</div>
+      </div>` : ''}
     `;
+
+    if(entry.id === 10){
+      const target = new Date('2026-08-27T20:00:00');
+      const cdEl = document.getElementById('final-countdown');
+      function tickCountdown(){
+        const diff = target - new Date();
+        if(diff <= 0){ cdEl.textContent = "C'est maintenant."; return; }
+        const h = Math.floor(diff/3600000);
+        const m = Math.floor((diff%3600000)/60000);
+        const s = Math.floor((diff%60000)/1000);
+        cdEl.textContent = `${h}h ${m.toString().padStart(2,'0')}m ${s.toString().padStart(2,'0')}s`;
+      }
+      tickCountdown();
+      setInterval(tickCountdown, 1000);
+    }
 
     // Rendre cliquables les images du calendrier et de la galerie
     const lightbox = document.getElementById('lightbox');

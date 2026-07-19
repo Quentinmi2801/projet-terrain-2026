@@ -37,7 +37,7 @@
   .feedback{ font-family:'IBM Plex Mono', monospace; font-size:0.75rem; min-height:1.2em; color:var(--stamp); }
 
   .taquin{ display:grid; grid-template-columns:repeat(3, 1fr); gap:3px; max-width:280px; margin:1rem auto; background:var(--ink); padding:3px; border-radius:8px; }
-  .tile{ aspect-ratio:1; background-size:280px 280px; cursor:pointer; }
+  .tile{ aspect-ratio:1; background-size:300% 300%; cursor:pointer; }
   .tile.blank{ background:var(--paper); cursor:default; }
 
   .step{ display:none; }
@@ -238,7 +238,7 @@
         div.className = 'tile';
         const row = Math.floor(val/SIZE), col = val%SIZE;
         div.style.backgroundImage = "url('escape-puzzle.jpg')";
-        div.style.backgroundPosition = `-${col*93.33}px -${row*93.33}px`;
+        div.style.backgroundPosition = `${col*50}% ${row*50}%`;
       }
       div.addEventListener('click', () => tryMove(idx));
       taquinEl.appendChild(div);
