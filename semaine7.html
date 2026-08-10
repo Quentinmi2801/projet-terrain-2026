@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trois petits jeux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --paper:#EDE3CC; --ink:#1B2A4A; --ink-soft:#334463; --sage:#6E8B7A; --stamp:#B24C3A; --gold:#C99A3E; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    background:
+      linear-gradient(rgba(27,42,74,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(27,42,74,0.05) 1px, transparent 1px),
+      var(--paper);
+    background-size:22px 22px, 22px 22px, auto;
+    color:var(--ink-soft); font-family:'Source Serif 4', serif; line-height:1.6; min-height:100svh;
+  }
+  .page{ max-width:640px; margin:0 auto; padding:2rem 1.3rem 4rem; }
+  a.back{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; color:var(--ink); text-decoration:none; display:inline-block; margin-bottom:1rem; }
+  a.back:before{ content:"← "; }
+  h1{ font-family:'Caveat', cursive; font-size:2rem; color:var(--ink); text-align:center; margin-bottom:0.3rem; }
+  h2{ font-family:'Caveat', cursive; font-size:1.6rem; color:var(--ink); margin-bottom:0.6rem; }
+  .stamp-label{ font-family:'Special Elite', monospace; font-size:0.65rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--stamp); display:inline-block; border:1px dashed var(--stamp); padding:0.15rem 0.5rem; margin-bottom:0.6rem; border-radius:10px 4px 10px 4px; }
+
+  .card{ border:1.5px solid rgba(27,42,74,0.2); background:rgba(255,255,255,0.35); border-radius:18px 8px 20px 10px; padding:1.3rem 1.1rem; margin-bottom:2rem; }
+
+  /* --- scratch --- */
+  #scratch-wrap{ position:relative; max-width:320px; margin:0.5rem auto; border-radius:10px; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.25); touch-action:none; }
+  #scratch-wrap img{ width:100%; display:block; }
+  #scratch-canvas{ position:absolute; top:0; left:0; width:100%; height:100%; cursor:pointer; }
+  #scratch-hint{ text-align:center; font-family:'IBM Plex Mono', monospace; font-size:0.7rem; opacity:0.6; margin-top:0.5rem; }
+
+  /* --- portrait chinois --- */
+  .pc-row{ margin-bottom:0.9rem; }
+  .pc-row label{ font-family:'Caveat', cursive; font-size:1.15rem; color:var(--ink); display:block; margin-bottom:0.3rem; }
+  .pc-row input{ width:100%; font-family:'Source Serif 4', serif; font-size:1rem; padding:0.5rem 0.7rem; border:1px solid rgba(27,42,74,0.3); border-radius:8px; background:var(--paper); }
+  .btn{ all:unset; cursor:pointer; display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:0.8rem; letter-spacing:0.05em; text-transform:uppercase; background:var(--ink); color:var(--paper); padding:0.65rem 1.2rem; border-radius:14px 6px 14px 6px; }
+  .status{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; margin-top:0.6rem; min-height:1.2em; color:var(--stamp); }
+
+  /* --- musique --- */
+  #music-search{ width:100%; font-family:'Source Serif 4', serif; font-size:1rem; padding:0.6rem 0.8rem; border:1px solid rgba(27,42,74,0.3); border-radius:10px; background:var(--paper); margin-bottom:0.7rem; }
+  .track-result{ display:flex; align-items:center; gap:0.6rem; padding:0.5rem; border-bottom:1px solid rgba(27,42,74,0.12); cursor:pointer; }
+  .track-result img{ width:44px; height:44px; border-radius:4px; }
+  .track-result .info{ flex:1; font-size:0.88rem; }
+  .track-result .info b{ display:block; font-size:0.92rem; }
+  .track-result .add-icon{ font-size:1.3rem; color:var(--sage); }
+  #results{ max-height:260px; overflow-y:auto; margin-bottom:1rem; }
+  .rank-item{ display:flex; align-items:center; gap:0.6rem; padding:0.5rem; border:1px solid rgba(27,42,74,0.2); border-radius:8px; margin-bottom:0.5rem; background:rgba(255,255,255,0.4); }
+  .rank-item img{ width:38px; height:38px; border-radius:4px; }
+  .rank-item .info{ flex:1; font-size:0.85rem; }
+  .rank-item .arrows{ display:flex; flex-direction:column; }
+  .rank-item .arrows button, .rank-item .remove-btn{ all:unset; cursor:pointer; font-size:1rem; padding:0.1rem 0.4rem; }
+  .rank-num{ font-family:'Caveat', cursive; font-size:1.4rem; color:var(--stamp); width:1.6rem; text-align:center; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <a class="back" href="index.html">retour au carnet</a>
+  <h1>Trois petits jeux</h1>
+
+  <section class="card">
+    <span class="stamp-label">à gratter</span>
+    <h2>Une surprise là-dessous</h2>
+    <div id="scratch-wrap">
+      <img src="semaine7-scratch.jpg" alt="">
+      <canvas id="scratch-canvas"></canvas>
+    </div>
+    <div id="scratch-hint">gratte l'écran avec le doigt</div>
+  </section>
+
+  <section class="card">
+    <span class="stamp-label">portrait chinois</span>
+    <h2>Si tu étais...</h2>
+    <div id="pc-form"></div>
+    <button class="btn" id="pc-save">Enregistrer</button>
+    <div class="status" id="pc-status"></div>
+  </section>
+
+  <section class="card">
+    <span class="stamp-label">playlist</span>
+    <h2>Tes 5 titres du moment</h2>
+    <input type="text" id="music-search" placeholder="cherche un titre ou un artiste...">
+    <div id="results"></div>
+    <div id="ranking"></div>
+    <div class="status" id="music-status"></div>
+  </section>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+  let db = null;
+  try{ firebase.initializeApp(firebaseConfig); db = firebase.firestore(); }catch(e){}
+
+  /* ===================== SCRATCH CARD ===================== */
+  (function(){
+    const wrap = document.getElementById('scratch-wrap');
+    const img = wrap.querySelector('img');
+    const canvas = document.getElementById('scratch-canvas');
+    const ctx = canvas.getContext('2d');
+    let revealed = false;
+
+    function setupCanvas(){
+      canvas.width = wrap.clientWidth;
+      canvas.height = wrap.clientHeight;
+      ctx.fillStyle = '#C9A876';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle = 'rgba(27,42,74,0.5)';
+      for(let i=0;i<40;i++){
+        ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 2, 2);
+      }
+      ctx.font = 'bold 20px Caveat, cursive';
+      ctx.fillStyle = '#1B2A4A';
+      ctx.textAlign = 'center';
+      ctx.fillText('gratte-moi', canvas.width/2, canvas.height/2);
+    }
+    if(img.complete){ setupCanvas(); } else { img.addEventListener('load', setupCanvas); }
+    window.addEventListener('resize', () => { if(!revealed) setupCanvas(); });
+
+    function scratchAt(x, y){
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(x, y, 22, 0, Math.PI*2);
+      ctx.fill();
+    }
+    function getPos(e){
+      const rect = canvas.getBoundingClientRect();
+      const point = e.touches ? e.touches[0] : e;
+      return { x: point.clientX - rect.left, y: point.clientY - rect.top };
+    }
+    let drawing = false;
+    function start(e){ drawing = true; const p = getPos(e); scratchAt(p.x, p.y); }
+    function move(e){ if(!drawing) return; e.preventDefault(); const p = getPos(e); scratchAt(p.x, p.y); checkRevealed(); }
+    function end(){ drawing = false; }
+    canvas.addEventListener('mousedown', start);
+    canvas.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', end);
+    canvas.addEventListener('touchstart', start);
+    canvas.addEventListener('touchmove', move);
+    canvas.addEventListener('touchend', end);
+
+    function checkRevealed(){
+      if(revealed) return;
+      const data = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+      let cleared = 0, total = data.length/4;
+      for(let i=3;i<data.length;i+=4*20){ if(data[i] === 0) cleared++; }
+      if(cleared / (total/20) > 0.55){
+        revealed = true;
+        canvas.style.transition = 'opacity .6s ease';
+        canvas.style.opacity = '0';
+        fireBurst();
+        setTimeout(() => canvas.remove(), 650);
+      }
+    }
+    function fireBurst(){
+      const rect = wrap.getBoundingClientRect();
+      const cx = rect.left + rect.width/2, cy = rect.top + rect.height/2;
+      const symbols = ['✨','🎉','💥','🌸','💫','⭐'];
+      for(let i=0;i<30;i++){
+        const s = document.createElement('span');
+        s.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+        const angle = Math.random()*Math.PI*2, dist = 90+Math.random()*180;
+        s.style.cssText = `position:fixed; left:${cx}px; top:${cy}px; font-size:${1+Math.random()*1.3}rem; pointer-events:none; z-index:300; transition:transform 1s ease-out, opacity 1.2s ease;`;
+        document.body.appendChild(s);
+        requestAnimationFrame(() => {
+          s.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
+          s.style.opacity = '0';
+        });
+        setTimeout(() => s.remove(), 1300);
+      }
+    }
+  })();
+
+  /* ===================== PORTRAIT CHINOIS ===================== */
+  const PC_PROMPTS = [
+    "Si j'étais une couleur, je serais",
+    "Si j'étais un animal, je serais",
+    "Si j'étais une saison, je serais",
+    "Si j'étais un plat, je serais",
+    "Si j'étais une chanson, je serais",
+    "Si j'étais un lieu, je serais",
+    "Si j'étais un film, je serais",
+    "Si j'étais une boisson, je serais",
+    "Si j'étais un objet du quotidien, je serais",
+    "Si j'étais un super-pouvoir, je serais"
+  ];
+  const pcForm = document.getElementById('pc-form');
+  PC_PROMPTS.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'pc-row';
+    div.innerHTML = `<label>${p}...</label><input type="text" id="pc-${i}" placeholder="ta réponse">`;
+    pcForm.appendChild(div);
+  });
+  if(db){
+    db.collection('week7').doc('portrait').get().then(doc => {
+      if(doc.exists){
+        const d = doc.data();
+        PC_PROMPTS.forEach((p,i) => { if(d['a'+i]) document.getElementById('pc-'+i).value = d['a'+i]; });
+      }
+    }).catch(()=>{});
+  }
+  document.getElementById('pc-save').addEventListener('click', () => {
+    const statusEl = document.getElementById('pc-status');
+    if(!db){ statusEl.textContent = 'Connexion indisponible.'; return; }
+    const data = {};
+    PC_PROMPTS.forEach((p,i) => { data['a'+i] = document.getElementById('pc-'+i).value.trim(); });
+    db.collection('week7').doc('portrait').set(data)
+      .then(() => { statusEl.textContent = 'Enregistré !'; setTimeout(()=>statusEl.textContent='',2000); })
+      .catch(() => { statusEl.textContent = "Erreur, vérifie les règles Firestore."; });
+  });
+
+  /* ===================== MUSIQUE (recherche iTunes + classement) ===================== */
+  const searchInput = document.getElementById('music-search');
+  const resultsEl = document.getElementById('results');
+  const rankingEl = document.getElementById('ranking');
+  const musicStatus = document.getElementById('music-status');
+  let ranking = [];
+  let searchTimeout;
+
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    const q = searchInput.value.trim();
+    if(!q){ resultsEl.innerHTML = ''; return; }
+    searchTimeout = setTimeout(() => searchTracks(q), 400);
+  });
+
+  function searchTracks(q){
+    fetch('https://itunes.apple.com/search?media=music&entity=song&limit=8&term=' + encodeURIComponent(q))
+      .then(r => r.json())
+      .then(data => {
+        resultsEl.innerHTML = '';
+        (data.results || []).forEach(track => {
+          const div = document.createElement('div');
+          div.className = 'track-result';
+          div.innerHTML = `<img src="${track.artworkUrl60}" alt=""><div class="info"><b>${track.trackName}</b>${track.artistName}</div><span class="add-icon">+</span>`;
+          div.addEventListener('click', () => addToRanking(track));
+          resultsEl.appendChild(div);
+        });
+      }).catch(() => { musicStatus.textContent = "Recherche indisponible pour le moment."; });
+  }
+
+  function addToRanking(track){
+    if(ranking.length >= 5){ musicStatus.textContent = 'Déjà 5 titres — retire-en un avant d\'en ajouter un autre.'; return; }
+    if(ranking.some(t => t.trackId === track.trackId)) return;
+    ranking.push({ trackId: track.trackId, trackName: track.trackName, artistName: track.artistName, artworkUrl60: track.artworkUrl60 });
+    renderRanking();
+    saveRanking();
+  }
+  function moveItem(idx, dir){
+    const newIdx = idx + dir;
+    if(newIdx < 0 || newIdx >= ranking.length) return;
+    [ranking[idx], ranking[newIdx]] = [ranking[newIdx], ranking[idx]];
+    renderRanking();
+    saveRanking();
+  }
+  function removeItem(idx){
+    ranking.splice(idx,1);
+    renderRanking();
+    saveRanking();
+  }
+  function renderRanking(){
+    rankingEl.innerHTML = '';
+    ranking.forEach((t, i) => {
+      const div = document.createElement('div');
+      div.className = 'rank-item';
+      div.innerHTML = `
+        <span class="rank-num">${i+1}</span>
+        <img src="${t.artworkUrl60}" alt="">
+        <div class="info"><b>${t.trackName}</b><br>${t.artistName}</div>
+        <div class="arrows">
+          <button data-dir="-1" data-idx="${i}">▲</button>
+          <button data-dir="1" data-idx="${i}">▼</button>
+        </div>
+        <button class="remove-btn" data-remove="${i}">✕</button>
+      `;
+      rankingEl.appendChild(div);
+    });
+    rankingEl.querySelectorAll('button[data-dir]').forEach(btn => {
+      btn.addEventListener('click', () => moveItem(parseInt(btn.dataset.idx), parseInt(btn.dataset.dir)));
+    });
+    rankingEl.querySelectorAll('button[data-remove]').forEach(btn => {
+      btn.addEventListener('click', () => removeItem(parseInt(btn.dataset.remove)));
+    });
+  }
+  function saveRanking(){
+    if(!db) return;
+    db.collection('week7').doc('playlist').set({ tracks: ranking })
+      .catch(() => { musicStatus.textContent = "Sauvegarde impossible, vérifie les règles Firestore."; });
+  }
+  if(db){
+    db.collection('week7').doc('playlist').get().then(doc => {
+      if(doc.exists && doc.data().tracks){ ranking = doc.data().tracks; renderRanking(); }
+    }).catch(()=>{});
+  }
+</script>
+
+</body>
+</html>

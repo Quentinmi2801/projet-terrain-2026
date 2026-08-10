@@ -367,7 +367,7 @@
     </div>
   </div>
 
-<script src="entries.js?v=14"></script>
+<script src="entries.js?v=15"></script>
 <script>
   // ---- GATE ----
   const CODE = '0506';
@@ -468,7 +468,7 @@
     const unlocked = isUnlocked(entry);
     const a = document.createElement(unlocked ? 'a' : 'div');
     a.className = 'capsule-card' + (unlocked ? '' : ' locked');
-    if(unlocked) a.href = (entry.type === 'escape') ? 'escape.html' : (entry.id === 4 ? 'semaine4.html' : (entry.id === 9 ? 'semaine9.html' : ('semaine.html?id=' + entry.id)));
+    if(unlocked) a.href = (entry.type === 'escape') ? 'escape.html' : (entry.id === 4 ? 'semaine4.html' : (entry.id === 9 ? 'semaine9.html' : (entry.id === 7 ? 'semaine7.html' : ('semaine.html?id=' + entry.id))));
     a.innerHTML = `
       <span class="badge">${unlocked ? '🌸' : '🔒'}</span>
       <h3>${entry.title}</h3>

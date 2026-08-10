@@ -83,11 +83,11 @@ const ENTRIES = [
   {
     id: 7,
     unlock: '2026-08-09',
-    title: 'Semaine 7 · en vrac',
-    teaser: 'Quelques flashs, pêle-mêle.',
-    type: 'text',
-    // Lettre-minute : 3-4 choses marquantes depuis le début de l'été, en vrac, pas un bilan complet.
-    content: "[Lettre-minute à écrire : 3-4 flashs marquants depuis le début de l'été, quelques lignes chacun, pas besoin de développer.]",
+    title: 'Semaine 7 · trois petits jeux',
+    teaser: 'Une surprise à gratter, un portrait, une playlist.',
+    type: 'triple',
+    // Page dédiée : semaine7.html
+    content: null,
     bonus: { type: 'proverbe', text: "Les grandes histoires se racontent souvent par petits bouts." }
   },
   {
