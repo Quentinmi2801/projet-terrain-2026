@@ -116,6 +116,13 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="firebase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="emailjs-config.js"></script>
+<script>
+  if(typeof emailjs !== 'undefined' && typeof EMAILJS_PUBLIC_KEY !== 'undefined' && EMAILJS_PUBLIC_KEY !== 'COLLE_ICI'){
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+  }
+</script>
 <script src="supabase-config.js"></script>
 <script src="photos.js?v=2"></script>
 <script>
@@ -203,6 +210,7 @@
         const url = urlData.publicUrl;
         await db.collection('library').add({ url, path, caption, by: who, ts: firebase.firestore.FieldValue.serverTimestamp() });
         addPolaroid(url, caption, who);
+        if(typeof notifyOther === 'function') notifyOther(who, 'une nouvelle photo dans la bibliothèque' + (caption ? (' : '+caption) : ''));
         document.getElementById('photo-file').value = '';
         document.getElementById('photo-caption').value = '';
         statusEl.textContent = 'Ajoutée !';

@@ -55,10 +55,9 @@
 <a class="back" href="index.html">retour au carnet</a>
 <h1>Notre chat</h1>
 
-<div id="whoami">
-  <p>Qui es-tu ?</p>
-  <button id="btn-quentin">Quentin</button>
-  <button id="btn-arwen">Arwen</button>
+<div id="not-logged" style="display:none; text-align:center; padding:2rem 1.5rem;">
+  <p style="font-family:'Caveat', cursive; font-size:1.5rem;">Passe d'abord par le carnet.</p>
+  <p><a class="back" href="index.html" style="margin-bottom:0;">← retour au carnet</a></p>
 </div>
 
 <div id="chat-wrap">
@@ -73,6 +72,13 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="emailjs-config.js"></script>
+<script>
+  if(typeof emailjs !== 'undefined' && typeof EMAILJS_PUBLIC_KEY !== 'undefined' && EMAILJS_PUBLIC_KEY !== 'COLLE_ICI'){
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+  }
+</script>
 <script>
   const statusEl = document.getElementById('status');
   let db = null;
@@ -83,15 +89,17 @@
     statusEl.textContent = "Connexion au chat impossible, vérifie firebase-config.js";
   }
 
-  const whoamiEl = document.getElementById('whoami');
+  const notLoggedEl = document.getElementById('not-logged');
   const chatWrap = document.getElementById('chat-wrap');
   const messagesEl = document.getElementById('messages');
   const input = document.getElementById('msg-input');
 
-  let me = localStorage.getItem('carnet-whoami');
+  // L'identité vient directement de la connexion faite sur le carnet (index.html),
+  // plus de sélecteur séparé ici : impossible de se tromper de compte.
+  const role = sessionStorage.getItem('carnet-role');
+  const me = role === 'admin' ? 'Quentin' : (role === 'guest' ? 'Arwen' : null);
 
   function startChat(){
-    whoamiEl.style.display = 'none';
     chatWrap.style.display = 'flex';
     if(!db) return;
 
@@ -100,11 +108,16 @@
         messagesEl.innerHTML = '';
         snap.forEach(doc => {
           const m = doc.data();
+          const mine = m.sender === me;
           const div = document.createElement('div');
-          div.className = 'msg ' + (m.sender === me ? 'me' : 'them');
+          div.className = 'msg ' + (mine ? 'me' : 'them');
           const time = m.ts && m.ts.toDate ? m.ts.toDate().toLocaleString('fr-FR', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}) : '';
-          div.innerHTML = `${escapeHtml(m.text)}<div class="meta">${m.sender} · ${time}</div>`;
+          div.innerHTML = `${escapeHtml(m.text)}${m.edited ? ' <span style="opacity:0.5; font-size:0.7em;">(modifié)</span>' : ''}
+            <div class="meta">${m.sender} · ${time}${mine ? ' · <button class="edit-btn" data-id="'+doc.id+'" data-text="'+encodeURIComponent(m.text)+'" style="all:unset; cursor:pointer; text-decoration:underline;">modifier</button>' : ''}</div>`;
           messagesEl.appendChild(div);
+        });
+        messagesEl.querySelectorAll('.edit-btn').forEach(btn => {
+          btn.addEventListener('click', () => editMessage(btn.dataset.id, decodeURIComponent(btn.dataset.text)));
         });
         messagesEl.scrollTop = messagesEl.scrollHeight;
       }, err => {
@@ -112,14 +125,20 @@
       });
   }
 
+  function editMessage(id, oldText){
+    const newText = prompt('Modifier ton message :', oldText);
+    if(newText === null) return;
+    const trimmed = newText.trim();
+    if(!trimmed || trimmed === oldText) return;
+    db.collection('messages').doc(id).update({ text: trimmed, edited: true })
+      .catch(() => { statusEl.textContent = "Modification impossible, vérifie les règles Firestore."; });
+  }
+
   function escapeHtml(s){
     return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
-  document.getElementById('btn-quentin').addEventListener('click', () => { me='Quentin'; localStorage.setItem('carnet-whoami', me); startChat(); });
-  document.getElementById('btn-arwen').addEventListener('click', () => { me='Arwen'; localStorage.setItem('carnet-whoami', me); startChat(); });
-
-  if(me){ startChat(); }
+  if(me){ startChat(); } else { notLoggedEl.style.display = 'block'; }
 
   function sendMessage(){
     const text = input.value.trim();
@@ -130,6 +149,8 @@
       text: text,
       key: (typeof SHARED_KEY !== 'undefined') ? SHARED_KEY : '',
       ts: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      if(typeof notifyOther === 'function') notifyOther(me, text);
     }).catch(() => { statusEl.textContent = "Message non envoyé, vérifie les règles Firestore."; });
   }
   document.getElementById('send-btn').addEventListener('click', sendMessage);

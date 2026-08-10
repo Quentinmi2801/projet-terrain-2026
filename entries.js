@@ -65,7 +65,7 @@ const ENTRIES = [
     title: 'Semaine 5 · écoute ça',
     teaser: 'Une chanson, pour toi.',
     type: 'video',
-    // Chanson choisie : Talking to the Moon - Bruno Mars. À FOURNIR : ta vidéo/audio une fois enregistrée.
+    // À FOURNIR : la chanson interprétée (vidéo ou audio — change le type en 'audio' si besoin), une fois choisie.
     content: 'semaine5.mp4',
     bonus: { type: 'devinette', text: "Je n'ai pas d'image mais je te fais fermer les yeux. Qui suis-je ?" }
   },
@@ -76,16 +76,18 @@ const ENTRIES = [
     teaser: 'Regarde plutôt du côté de ta boîte aux lettres.',
     type: 'text',
     content: "Cette semaine, la surprise n'est pas sur cet écran.\n\nElle est en route vers chez toi.",
+    // À FOURNIR : le petit vocal expliquant le colis, une fois enregistré (semaine6-audio.m4a).
+    extraAudio: 'semaine6-audio.m4a',
     bonus: { type: 'devinette', text: "On me donne, on me garde, on m'échange plus tard contre un moment rien qu'à deux. Qui suis-je ?" }
   },
   {
     id: 7,
     unlock: '2026-08-09',
-    title: 'Semaine 7 · à voir',
-    teaser: '...',
-    type: 'pending',
-    // OUVERT — encore à définir ensemble (les flashcards restent une piste possible ici).
-    content: "Cette semaine est encore à inventer.",
+    title: 'Semaine 7 · en vrac',
+    teaser: 'Quelques flashs, pêle-mêle.',
+    type: 'text',
+    // Lettre-minute : 3-4 choses marquantes depuis le début de l'été, en vrac, pas un bilan complet.
+    content: "[Lettre-minute à écrire : 3-4 flashs marquants depuis le début de l'été, quelques lignes chacun, pas besoin de développer.]",
     bonus: { type: 'proverbe', text: "Les grandes histoires se racontent souvent par petits bouts." }
   },
   {
